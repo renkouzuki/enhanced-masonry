@@ -1,6 +1,6 @@
 {
   "name": "masonry-renko",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "masonry grid by renko >///<",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
