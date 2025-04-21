@@ -10,7 +10,7 @@ const MasonryDemo = () => {
   const [isSequential, setIsSequential] = useState(false);
   const [theme, setTheme] = useState('pastel');
   
-  const generateItems = (count, theme) => {
+  const generateItems = (count:number, theme:string) => {
     return Array(count).fill(null).map((_, i) => {
       const height = Math.floor(Math.random() * 150) + 100;
       
