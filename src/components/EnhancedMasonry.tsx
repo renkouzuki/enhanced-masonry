@@ -4,35 +4,83 @@ import React, {
   useState,
   useMemo,
   ReactNode,
-  ReactElement,
+  useCallback,
+  ElementType,
 } from "react";
 
-interface MasonryProps {
-  children: ReactNode;
-  columnsCount?: number;
-  gutter?: string;
-  className?: string | null;
-  style?: React.CSSProperties;
-  containerTag?: string;
-  itemTag?: string;
-  itemStyle?: React.CSSProperties;
-  sequential?: boolean;
+interface BreakPoint {
+  [key: number]: number | string;
 }
 
-const Masonry: React.FC<MasonryProps> = ({
+interface EnhancedMasonryProps {
+  children: ReactNode;
+  columnsBreakPoints?: BreakPoint;
+  gutterBreakPoints?: BreakPoint;
+  defaultColumns?: number;
+  defaultGutter?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  itemStyle?: React.CSSProperties;
+  sequential?: boolean;
+  containerTag?: ElementType;
+  itemTag?: ElementType;
+}
+
+const EnhancedMasonry: React.FC<EnhancedMasonryProps> = ({
   children,
-  columnsCount = 3,
-  gutter = "0",
-  className = null,
+  columnsBreakPoints = { 350: 1, 750: 2, 900: 3 },
+  gutterBreakPoints = { 350: "10px", 750: "15px", 900: "20px" },
+  defaultColumns = 3,
+  defaultGutter = "10px",
+  className,
   style = {},
-  containerTag = "div",
-  itemTag = "div",
   itemStyle = {},
   sequential = false,
+  containerTag = "div",
+  itemTag = "div",
 }) => {
-  const [columns, setColumns] = useState<ReactElement[][]>([]);
+  const [windowWidth, setWindowWidth] = useState<number>(0);
+  const [hasMounted, setHasMounted] = useState<boolean>(false);
+  const [columns, setColumns] = useState<React.ReactElement[][]>([]);
   const [hasDistributed, setHasDistributed] = useState<boolean>(false);
   const childrenRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
+
+  useEffect(() => {
+    setHasMounted(true);
+    setWindowWidth(window.innerWidth);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setHasDistributed(false);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const getResponsiveValue = useCallback(
+    <T extends number | string>(breakPoints: BreakPoint, defaultValue: T): T => {
+      if (!hasMounted) return defaultValue;
+
+      const sortedBreakPoints = Object.keys(breakPoints)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      let value = defaultValue;
+
+      sortedBreakPoints.forEach((breakPoint) => {
+        if (breakPoint <= windowWidth) {
+          value = breakPoints[breakPoint] as T;
+        }
+      });
+
+      return value;
+    },
+    [windowWidth, hasMounted]
+  );
+
+  const columnsCount = getResponsiveValue<number>(columnsBreakPoints, defaultColumns);
+  const gutter = getResponsiveValue<string>(gutterBreakPoints, defaultGutter);
 
   useEffect(() => {
     childrenRefs.current = Array(React.Children.count(children))
@@ -43,7 +91,7 @@ const Masonry: React.FC<MasonryProps> = ({
   }, [children]);
 
   const getEqualColumns = useMemo(() => {
-    const cols: ReactElement[][] = Array.from(
+    const cols: React.ReactElement[][] = Array.from(
       { length: columnsCount },
       () => []
     );
@@ -53,11 +101,13 @@ const Masonry: React.FC<MasonryProps> = ({
       if (child && React.isValidElement(child)) {
         cols[validIndex % columnsCount].push(
           <div
-            style={{ display: "flex", justifyContent: "stretch" }}
+            style={{ display: "flex", justifyContent: "stretch", width: "100%" }}
             key={validIndex}
             ref={childrenRefs.current[validIndex]}
           >
-            {child}
+            {React.cloneElement(child, {
+              style: { width: "100%", ...child.props.style },
+            })}
           </div>
         );
         validIndex++;
@@ -77,7 +127,7 @@ const Masonry: React.FC<MasonryProps> = ({
 
     const distributeChildren = (): boolean => {
       const columnHeights = Array(columnsCount).fill(0);
-      const cols: ReactElement[][] = Array.from(
+      const cols: React.ReactElement[][] = Array.from(
         { length: columnsCount },
         () => []
       );
@@ -102,11 +152,15 @@ const Masonry: React.FC<MasonryProps> = ({
           columnHeights[minHeightColumnIndex] += childHeight;
           cols[minHeightColumnIndex].push(
             <div
-              style={{ display: "flex", justifyContent: "stretch" }}
+              style={{ display: "flex", justifyContent: "stretch", width: "100%" }}
               key={validIndex}
               ref={childrenRefs.current[validIndex]}
             >
-              {child}
+              {React.isValidElement(child) 
+                ? React.cloneElement(child as React.ReactElement<any>, {
+                    style: { width: "100%", ...(child.props.style || {}) },
+                  })
+                : child}
             </div>
           );
           validIndex++;
@@ -127,12 +181,12 @@ const Masonry: React.FC<MasonryProps> = ({
     }
 
     return undefined;
-  }, [children, columnsCount, hasDistributed, sequential]);
+  }, [children, columnsCount, hasDistributed, sequential, hasMounted]);
 
   const renderColumns = () => {
     return columns.map((column, i) =>
       React.createElement(
-        itemTag,
+        itemTag as React.ElementType,
         {
           key: i,
           style: {
@@ -151,8 +205,12 @@ const Masonry: React.FC<MasonryProps> = ({
     );
   };
 
+  if (!hasMounted) {
+    return null;
+  }
+
   return React.createElement(
-    containerTag,
+    containerTag as React.ElementType,
     {
       style: {
         display: "flex",
@@ -170,4 +228,4 @@ const Masonry: React.FC<MasonryProps> = ({
   );
 };
 
-export default Masonry;
+export default EnhancedMasonry;

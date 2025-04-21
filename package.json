@@ -1,7 +1,7 @@
 {
-  "name": "masonry-renko",
-  "version": "1.0.1",
-  "description": "masonry grid by renko >///<",
+  "name": "enhanced-masonry",
+  "version": "1.0.0",
+  "description": "A lightweight and responsive masonry grid layout with enhanced flexibility and performance. Perfect for galleries, portfolios, and dynamic content arrangements.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -30,6 +30,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "masonry-renko": "file:"
+    "enhanced-masonry": "file:"
   }
 }

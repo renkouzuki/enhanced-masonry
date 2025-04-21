@@ -1,5 +1,3 @@
-import Masonry from "./components/Masonry";
-import ResponsiveMasonry from "./components/ResponsiveMasonry";
+import EnhancedMasonry from "./components/EnhancedMasonry";
 
-export default Masonry;
-export { ResponsiveMasonry };
+export { EnhancedMasonry };
