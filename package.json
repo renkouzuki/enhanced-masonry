@@ -1,6 +1,6 @@
 {
   "name": "enhanced-masonry",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight and responsive masonry grid layout with enhanced flexibility and performance. Perfect for galleries, portfolios, and dynamic content arrangements.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
