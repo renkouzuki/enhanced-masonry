@@ -14,6 +14,11 @@
     "react-component"
   ],
   "author": "renko uzuki",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renkouzuki/enhanced-masonry"
+  },
+  "homepage": "https://enhanced-masonry-demo.vercel.app",
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
